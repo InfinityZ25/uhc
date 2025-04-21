@@ -1,25 +1,29 @@
 package us.jcedeno.uhc;
 
 import fr.mrmicky.fastinv.FastInvManager;
+import lombok.extern.log4j.Log4j2;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.PaperCommandManager;
 import org.incendo.cloud.paper.util.sender.PaperSimpleSenderMapper;
 import org.incendo.cloud.paper.util.sender.Source;
-import org.incendo.cloud.setting.ManagerSetting;
 
 import static org.incendo.cloud.parser.standard.IntegerParser.integerParser;
-import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 
+
+@Log4j2
 public final class Uhc extends JavaPlugin {
 
     private PaperCommandManager<Source> commandManager;
+    private AnnotationParser<PaperCommandManager<Source>> annotationParser;
 
 
     @Override
+    @SuppressWarnings("all")
     public void onEnable() {
-        // Plugin startup logic
+        // Register fastInv
         FastInvManager.register(this);
 
         // Set cloud command manager using modern cmd mngr
@@ -27,21 +31,15 @@ public final class Uhc extends JavaPlugin {
                 .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
                 .buildOnEnable(this);
 
+        // Instantiate the annotation parser
+        annotationParser = new AnnotationParser(commandManager, Source.class);
 
-        commandManager.settings().set(ManagerSetting.ALLOW_UNSAFE_REGISTRATION, true);
+        try {
+            annotationParser.parseContainers();
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
 
-        commandManager.command(
-                commandManager.commandBuilder("new_command")
-                        .required("name", stringParser())
-                        .handler(ctx -> {
-                            final String name = ctx.get("name");
-                            commandManager.command(
-                                    commandManager.commandBuilder(name).handler(ctx1 -> {
-                                        ctx1.sender().source().sendMessage("HI");
-                                    })
-                            );
-                        })
-        );
 
         commandManager.command(
                 commandManager.commandBuilder("command_test")
