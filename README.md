@@ -12,3 +12,5 @@ See https://deepwiki.com/noobstersmc/UHC-1.16 for expected features and code.
 - [ ] Stage Management System
 - [ ] Config System
 - [ ] Gamemodes System
+- [ ] Whitelist System
+- [ ] Unit Tests
